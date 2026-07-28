@@ -69,7 +69,7 @@
                 Alliance Rebrand
             </h1>
             <p class="text-xs sm:text-sm text-slate-400 max-w-xs mx-auto">
-                Cast your vote for our official new Alliance Name & Tag!
+                Check all the Alliance Names & Tags you would be happy wearing!
             </p>
         </header>
 
@@ -89,7 +89,7 @@
                     class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-sky-400 transition placeholder:text-slate-600"
                 >
                 <p class="text-[11px] text-slate-400">
-                    * Used to ensure 1 vote per member. Submitting again with the same name will update your vote.
+                    * Used to ensure 1 ballot per member. Submitting again with the same name will update your selections.
                 </p>
             </div>
 
@@ -97,10 +97,13 @@
             <div class="frost-glass p-4 sm:p-5 rounded-2xl shadow-xl space-y-5">
                 <div class="flex items-center justify-between border-b border-slate-700/70 pb-3">
                     <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-check-to-slot text-sky-400"></i> Choose One Option
+                        <i class="fa-solid fa-square-check text-sky-400"></i> Approval Voting
                     </h2>
-                    <span class="text-[11px] text-sky-400 bg-sky-950/60 border border-sky-800 px-2.5 py-0.5 rounded-full font-semibold">19 Proposals</span>
+                    <span class="text-[11px] text-sky-400 bg-sky-950/60 border border-sky-800 px-2.5 py-0.5 rounded-full font-semibold">27 Proposals</span>
                 </div>
+                <p class="text-xs text-sky-300/80 bg-sky-950/40 p-2.5 rounded-xl border border-sky-500/20">
+                    💡 <strong>How it works:</strong> Check the box for <u>EVERY</u> option you approve of. You can select 1, 5, or as many as you like!
+                </p>
 
                 <!-- Dynamic Rendering of Submission Categories -->
                 <div id="optionsList" class="space-y-6"></div>
@@ -113,7 +116,7 @@
                 class="w-full bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-slate-950 font-black py-4 px-6 rounded-2xl transition-all duration-200 shadow-lg shadow-sky-500/25 flex items-center justify-center gap-2 text-base uppercase tracking-wider cursor-pointer active:scale-[0.99]"
             >
                 <i class="fa-solid fa-paper-plane"></i>
-                <span>Submit Official Vote</span>
+                <span>Submit Official Ballot</span>
             </button>
         </form>
 
@@ -122,7 +125,7 @@
             <div class="w-16 h-16 bg-sky-500/10 border border-sky-400/30 rounded-full flex items-center justify-center mx-auto text-3xl text-sky-400">
                 <i class="fa-solid fa-circle-check"></i>
             </div>
-            <h3 class="text-2xl font-bold text-sky-400">Vote Successfully Recorded!</h3>
+            <h3 class="text-2xl font-bold text-sky-400">Ballot Successfully Recorded!</h3>
             <p class="text-sm text-slate-300 max-w-sm mx-auto leading-relaxed">
                 Thank you for contributing to our alliance's new identity. Final results will be calculated and announced via Alliance Group Mail once voting closes!
             </p>
@@ -131,7 +134,7 @@
                     onclick="resetForm()" 
                     class="text-xs text-sky-400 hover:text-sky-300 underline font-medium cursor-pointer"
                 >
-                    Change your vote or submit for another account?
+                    Change your selections or submit for another account?
                 </button>
             </div>
         </div>
@@ -168,8 +171,8 @@
                 <div id="adminResultsSection" class="hidden space-y-5">
                     <div class="flex items-center justify-between border-b border-slate-700 pb-3">
                         <div>
-                            <h3 class="text-lg font-black text-sky-400 uppercase tracking-wider">Live Results</h3>
-                            <p class="text-xs text-slate-400" id="totalVotesCount">Total Votes: 0</p>
+                            <h3 class="text-lg font-black text-sky-400 uppercase tracking-wider">Live Approval Rankings</h3>
+                            <p class="text-xs text-slate-400" id="totalVotesCount">Total Ballots Cast: 0</p>
                         </div>
                         <button 
                             onclick="fetchAdminResults()" 
@@ -220,7 +223,7 @@
         const FIREBASE_PROJECT_ID = "svs-scheduler-a1919";
         const ADMIN_PASSCODE = "WOS2026"; // Leadership Passcode
 
-        // Full Dataset of Proposals
+        // Full Master Dataset (27 Proposals)
         const optionsData = [
             { 
                 cat: "Villa Reyan's Ideas", 
@@ -263,13 +266,27 @@
                     { tag: "CAT", name: "Chaos and Tacos", emoji: "🌮" },
                     { tag: "OUT", name: "Outcasts", emoji: "🐺" }
                 ]
+            },
+            { 
+                cat: "New Member Submissions", 
+                badge: "MEMBERS",
+                items: [
+                    { tag: "SIR", name: "SpankItRight", emoji: "🖐️" },
+                    { tag: "RAW", name: "RecklessAndWild", emoji: "🤠" },
+                    { tag: "RAW", name: "RoughAndWild", emoji: "⛺" },
+                    { tag: "CIA", name: "ChaosIsAllowed", emoji: "🌀" },
+                    { tag: "WLF", name: "WolfPack", emoji: "🐺" },
+                    { tag: "HTD", name: "MostHated", emoji: "🤬" },
+                    { tag: "FUN", name: "FuryUnleashed", emoji: "⚡" },
+                    { tag: "LAW", name: "LoyaltyAndWar", emoji: "⚔️" }
+                ]
             }
         ];
 
         let cachedVotesData = [];
         let rawFetchedDocs = [];
 
-        // Render Options dynamically
+        // Render Options dynamically as Checkboxes
         function renderOptions() {
             const container = document.getElementById('optionsList');
             let html = '';
@@ -292,12 +309,11 @@
                         <label for="${id}" class="option-card flex items-center justify-between p-3 bg-slate-900/80 rounded-xl border border-slate-800 cursor-pointer">
                             <div class="flex items-center space-x-3">
                                 <input 
-                                    type="radio" 
+                                    type="checkbox" 
                                     id="${id}" 
                                     name="vote" 
                                     value="${fullValue}" 
-                                    required 
-                                    class="accent-sky-400 w-4 h-4 cursor-pointer"
+                                    class="accent-sky-400 w-4 h-4 rounded cursor-pointer"
                                 >
                                 <span class="text-sm font-medium text-slate-200 flex items-center gap-2">
                                     <span class="text-base">${opt.emoji}</span>
@@ -326,7 +342,15 @@
             
             const submitBtn = document.getElementById('submitBtn');
             const rawIgn = document.getElementById('ign').value.trim();
-            const selectedVote = document.querySelector('input[name="vote"]:checked').value;
+            
+            // Get all checked values
+            const checkedBoxes = document.querySelectorAll('input[name="vote"]:checked');
+            if (checkedBoxes.length === 0) {
+                alert("Please select at least one option before submitting!");
+                return;
+            }
+
+            const selectedVotes = Array.from(checkedBoxes).map(cb => cb.value);
 
             // Disable button during network request
             submitBtn.disabled = true;
@@ -337,11 +361,15 @@
             const docId = encodeURIComponent(rawIgn); 
             const endpoint = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/alliance_votes/${docId}`;
 
-            // Firestore REST API payload structure
+            // Firestore REST API payload structure (Stores array of strings)
             const payload = {
                 fields: {
                     ign: { stringValue: rawIgn },
-                    vote: { stringValue: selectedVote },
+                    votes: { 
+                        arrayValue: { 
+                            values: selectedVotes.map(v => ({ stringValue: v })) 
+                        } 
+                    },
                     timestamp: { stringValue: new Date().toISOString() }
                 }
             };
@@ -368,7 +396,7 @@
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i><span>Submit Official Vote</span>`;
+                submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i><span>Submit Official Ballot</span>`;
             }
         }
 
@@ -399,7 +427,7 @@
 
         async function fetchAdminResults() {
             const container = document.getElementById('resultsList');
-            container.innerHTML = `<div class="text-center text-xs text-sky-400 py-6"><i class="fa-solid fa-spinner animate-spin text-xl mb-2"></i><p>Tallying live votes...</p></div>`;
+            container.innerHTML = `<div class="text-center text-xs text-sky-400 py-6"><i class="fa-solid fa-spinner animate-spin text-xl mb-2"></i><p>Tallying live approval votes...</p></div>`;
 
             const endpoint = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/alliance_votes`;
 
@@ -408,8 +436,8 @@
                 const data = await response.json();
 
                 if (!data.documents || data.documents.length === 0) {
-                    container.innerHTML = `<p class="text-center text-xs text-slate-500 py-4">No votes recorded yet.</p>`;
-                    document.getElementById('totalVotesCount').innerText = `Total Votes: 0`;
+                    container.innerHTML = `<p class="text-center text-xs text-slate-500 py-4">No ballots recorded yet.</p>`;
+                    document.getElementById('totalVotesCount').innerText = `Total Ballots Cast: 0`;
                     rawFetchedDocs = [];
                     cachedVotesData = [];
                     return;
@@ -417,25 +445,31 @@
 
                 rawFetchedDocs = data.documents;
 
-                // Process Firestore docs
+                // Process Approval Votes
                 const tallyMap = {};
                 const votersMap = {};
-                let totalVotes = 0;
+                let totalBallots = data.documents.length;
 
                 data.documents.forEach(doc => {
                     const fields = doc.fields || {};
-                    const vote = fields.vote?.stringValue;
                     const ign = fields.ign?.stringValue || "Anonymous";
+                    
+                    // Support both single vote string or array of votes
+                    let userVotes = [];
+                    if (fields.votes?.arrayValue?.values) {
+                        userVotes = fields.votes.arrayValue.values.map(v => v.stringValue);
+                    } else if (fields.vote?.stringValue) {
+                        userVotes = [fields.vote.stringValue];
+                    }
 
-                    if (vote) {
+                    userVotes.forEach(vote => {
                         tallyMap[vote] = (tallyMap[vote] || 0) + 1;
                         if (!votersMap[vote]) votersMap[vote] = [];
                         votersMap[vote].push(ign);
-                        totalVotes++;
-                    }
+                    });
                 });
 
-                document.getElementById('totalVotesCount').innerText = `Total Votes: ${totalVotes}`;
+                document.getElementById('totalVotesCount').innerText = `Total Ballots Cast: ${totalBallots}`;
 
                 // Sort descending
                 const sorted = Object.entries(tallyMap).sort((a, b) => b[1] - a[1]);
@@ -443,7 +477,7 @@
 
                 let html = '';
                 sorted.forEach(([optionName, count], rank) => {
-                    const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
+                    const pct = totalBallots > 0 ? Math.round((count / totalBallots) * 100) : 0;
                     const voters = votersMap[optionName].join(', ');
 
                     html += `
@@ -453,7 +487,7 @@
                                     <span class="text-sky-400 font-mono">#${rank + 1}</span>
                                     <span>${optionName}</span>
                                 </span>
-                                <span class="text-sky-300 font-mono">${count} vote${count > 1 ? 's' : ''} (${pct}%)</span>
+                                <span class="text-sky-300 font-mono">${count} approval${count > 1 ? 's' : ''} (${pct}%)</span>
                             </div>
                             <!-- Progress Bar -->
                             <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
@@ -475,14 +509,14 @@
             }
         }
 
-        // Feature: Clear / Purge All Votes in Database (Fixed URL Encoding)
+        // Feature: Clear / Purge All Votes in Database
         async function clearAllVotes() {
             if (!rawFetchedDocs.length) {
                 alert("Database is already empty.");
                 return;
             }
 
-            const confirmation = prompt(`⚠️ WARNING: You are about to permanently delete all ${rawFetchedDocs.length} recorded votes!\n\nTo confirm reset, type "RESET" below:`);
+            const confirmation = prompt(`⚠️ WARNING: You are about to permanently delete all ${rawFetchedDocs.length} recorded ballots!\n\nTo confirm reset, type "RESET" below:`);
             if (confirmation !== "RESET") {
                 return;
             }
@@ -494,7 +528,7 @@
             try {
                 // Delete each document asynchronously by extracting and encoding doc ID
                 const deletePromises = rawFetchedDocs.map(doc => {
-                    const fullPath = doc.name; // Format: projects/{id}/databases/(default)/documents/alliance_votes/{docId}
+                    const fullPath = doc.name; 
                     const docId = fullPath.split('/').pop();
                     const encodedDocId = encodeURIComponent(docId);
                     const deleteEndpoint = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/alliance_votes/${encodedDocId}`;
@@ -505,15 +539,15 @@
                 const allSuccessful = responses.every(r => r.ok);
 
                 if (allSuccessful) {
-                    alert("All test votes have been successfully cleared!");
+                    alert("All test ballots have been successfully cleared!");
                 } else {
-                    alert("Cleared existing votes. Refreshing live tally...");
+                    alert("Cleared existing ballots. Refreshing live tally...");
                 }
                 
                 await fetchAdminResults(); // Refresh UI to confirm 0
             } catch (err) {
                 console.error("Error purging database:", err);
-                alert("Failed to clear some votes. Please check network and try again.");
+                alert("Failed to clear some ballots. Please check network and try again.");
             } finally {
                 clearBtn.disabled = false;
                 clearBtn.innerHTML = `<i class="fa-solid fa-trash-can"></i> Clear All Votes`;
@@ -526,9 +560,9 @@
                 return;
             }
 
-            let summary = "📊 **ALLIANCE REBRAND POLL RESULTS**\n\n";
+            let summary = "📊 **ALLIANCE REBRAND APPROVAL RESULTS**\n\n";
             cachedVotesData.slice(0, 5).forEach(([opt, count], i) => {
-                summary += `${i + 1}. **${opt}** — ${count} vote${count > 1 ? 's' : ''}\n`;
+                summary += `${i + 1}. **${opt}** — ${count} approval${count > 1 ? 's' : ''}\n`;
             });
             summary += "\nThank you to everyone who voted!";
 
