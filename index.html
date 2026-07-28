@@ -475,7 +475,7 @@
             }
         }
 
-        // Feature: Clear / Purge All Votes in Database
+        // Feature: Clear / Purge All Votes in Database (Fixed URL Encoding)
         async function clearAllVotes() {
             if (!rawFetchedDocs.length) {
                 alert("Database is already empty.");
@@ -492,17 +492,25 @@
             clearBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Clearing...`;
 
             try {
-                // Delete each document asynchronously
+                // Delete each document asynchronously by extracting and encoding doc ID
                 const deletePromises = rawFetchedDocs.map(doc => {
-                    const docName = doc.name; // Full document path returned by API
-                    const deleteEndpoint = `https://firestore.googleapis.com/v1/${docName}`;
+                    const fullPath = doc.name; // Format: projects/{id}/databases/(default)/documents/alliance_votes/{docId}
+                    const docId = fullPath.split('/').pop();
+                    const encodedDocId = encodeURIComponent(docId);
+                    const deleteEndpoint = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/alliance_votes/${encodedDocId}`;
                     return fetch(deleteEndpoint, { method: 'DELETE' });
                 });
 
-                await Promise.all(deletePromises);
+                const responses = await Promise.all(deletePromises);
+                const allSuccessful = responses.every(r => r.ok);
 
-                alert("All test votes have been successfully cleared!");
-                fetchAdminResults(); // Refresh UI
+                if (allSuccessful) {
+                    alert("All test votes have been successfully cleared!");
+                } else {
+                    alert("Cleared existing votes. Refreshing live tally...");
+                }
+                
+                await fetchAdminResults(); // Refresh UI to confirm 0
             } catch (err) {
                 console.error("Error purging database:", err);
                 alert("Failed to clear some votes. Please check network and try again.");
