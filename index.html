@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alliance Rebrand Voting Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        frost: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                            950: '#082f49',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #0b1329;
+            background-image: 
+                radial-gradient(at 50% 0%, rgba(14, 165, 233, 0.15) 0px, transparent 70%),
+                radial-gradient(at 100% 100%, rgba(2, 132, 199, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: #f8fafc;
+        }
+        .frost-glass {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+        .option-card {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .option-card:hover {
+            border-color: rgba(56, 189, 248, 0.5);
+            transform: translateY(-1px);
+        }
+        .option-card:has(input:checked) {
+            border-color: #38bdf8;
+            background-color: rgba(14, 165, 233, 0.15);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+        }
+    </style>
+</head>
+<body class="p-3 sm:p-6 max-w-xl mx-auto font-sans min-h-screen flex flex-col justify-between">
+
+    <main class="space-y-6">
+        <!-- Header / Banner -->
+        <header class="text-center my-4 sm:my-6 space-y-2">
+            <div class="inline-flex items-center justify-center p-3 bg-sky-500/10 rounded-full border border-sky-500/30 mb-2">
+                <i class="fa-solid fa-snowflake text-2xl text-sky-400 animate-pulse"></i>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-300 via-sky-400 to-blue-500 tracking-wider uppercase">
+                Alliance Rebrand
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-400 max-w-xs mx-auto">
+                Cast your vote for our official new Alliance Name & Tag!
+            </p>
+        </header>
+
+        <!-- Main Form -->
+        <form id="pollForm" onsubmit="submitVote(event)" class="space-y-5">
+            
+            <!-- Player Info Card -->
+            <div class="frost-glass p-4 rounded-2xl shadow-xl space-y-2">
+                <label for="ign" class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-user-shield text-sky-400"></i> In-Game Name (IGN)
+                </label>
+                <input 
+                    type="text" 
+                    id="ign" 
+                    required 
+                    placeholder="Enter your exact In-Game Name..." 
+                    class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-sky-400 transition placeholder:text-slate-600"
+                >
+                <p class="text-[11px] text-slate-400">
+                    * Used to ensure 1 vote per member. Submitting again with the same name will update your vote.
+                </p>
+            </div>
+
+            <!-- Options Container -->
+            <div class="frost-glass p-4 sm:p-5 rounded-2xl shadow-xl space-y-5">
+                <div class="flex items-center justify-between border-b border-slate-700/70 pb-3">
+                    <h2 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-check-to-slot text-sky-400"></i> Choose One Option
+                    </h2>
+                    <span class="text-[11px] text-sky-400 bg-sky-950/60 border border-sky-800 px-2.5 py-0.5 rounded-full font-semibold">19 Proposals</span>
+                </div>
+
+                <!-- Dynamic Rendering of Submission Categories -->
+                <div id="optionsList" class="space-y-6"></div>
+            </div>
+
+            <!-- Submit Button -->
+            <button 
+                type="submit" 
+                id="submitBtn" 
+                class="w-full bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-slate-950 font-black py-4 px-6 rounded-2xl transition-all duration-200 shadow-lg shadow-sky-500/25 flex items-center justify-center gap-2 text-base uppercase tracking-wider cursor-pointer active:scale-[0.99]"
+            >
+                <i class="fa-solid fa-paper-plane"></i>
+                <span>Submit Official Vote</span>
+            </button>
+        </form>
+
+        <!-- Thank You Screen (Hidden by Default) -->
+        <div id="thankYou" class="hidden frost-glass p-8 rounded-2xl text-center space-y-4 my-8">
+            <div class="w-16 h-16 bg-sky-500/10 border border-sky-400/30 rounded-full flex items-center justify-center mx-auto text-3xl text-sky-400">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-sky-400">Vote Successfully Recorded!</h3>
+            <p class="text-sm text-slate-300 max-w-sm mx-auto leading-relaxed">
+                Thank you for contributing to our alliance's new identity. Final results will be calculated and announced via Alliance Group Mail once voting closes!
+            </p>
+            <div class="pt-2">
+                <button 
+                    onclick="resetForm()" 
+                    class="text-xs text-sky-400 hover:text-sky-300 underline font-medium cursor-pointer"
+                >
+                    Change your vote or submit for another account?
+                </button>
+            </div>
+        </div>
+
+        <!-- Leadership Admin Dashboard Modal (Hidden by Default) -->
+        <div id="adminModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md p-4 overflow-y-auto flex items-center justify-center">
+            <div class="frost-glass w-full max-w-lg p-5 sm:p-6 rounded-2xl shadow-2xl space-y-5 my-8 relative">
+                <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg p-2">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+                <!-- Auth Section -->
+                <div id="adminAuthSection" class="space-y-4 py-4">
+                    <div class="text-center space-y-1">
+                        <i class="fa-solid fa-lock text-3xl text-sky-400 mb-1"></i>
+                        <h3 class="text-xl font-bold text-white">Leadership Portal</h3>
+                        <p class="text-xs text-slate-400">Enter officer passcode to view live poll results</p>
+                    </div>
+                    <input 
+                        type="password" 
+                        id="adminPasscode" 
+                        placeholder="Enter Passcode..." 
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-center text-white focus:outline-none focus:border-sky-400 tracking-widest text-lg"
+                    >
+                    <button 
+                        onclick="verifyAdminPasscode()" 
+                        class="w-full bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold py-3 rounded-xl transition"
+                    >
+                        Unlock Results
+                    </button>
+                </div>
+
+                <!-- Results Section -->
+                <div id="adminResultsSection" class="hidden space-y-5">
+                    <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                        <div>
+                            <h3 class="text-lg font-black text-sky-400 uppercase tracking-wider">Live Results</h3>
+                            <p class="text-xs text-slate-400" id="totalVotesCount">Total Votes: 0</p>
+                        </div>
+                        <button 
+                            onclick="fetchAdminResults()" 
+                            class="text-xs bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sky-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5"
+                        >
+                            <i class="fa-solid fa-rotate-right"></i> Refresh
+                        </button>
+                    </div>
+
+                    <!-- Ranked Results List -->
+                    <div id="resultsList" class="space-y-3 max-h-[45vh] overflow-y-auto pr-1"></div>
+
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800">
+                        <button 
+                            onclick="copyResultsToClipboard()" 
+                            class="bg-slate-800 hover:bg-slate-700 border border-sky-500/30 text-sky-300 font-bold py-3 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-1.5"
+                        >
+                            <i class="fa-solid fa-copy"></i> Copy Summary
+                        </button>
+
+                        <button 
+                            onclick="clearAllVotes()" 
+                            id="clearVotesBtn" 
+                            class="bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/30 text-rose-300 font-bold py-3 rounded-xl text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 transition"
+                        >
+                            <i class="fa-solid fa-trash-can"></i> Clear All Votes
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center text-[11px] text-slate-500 mt-10 mb-2 space-y-2">
+        <p>Whiteout Survival • Alliance Command Hub</p>
+        <button 
+            onclick="openAdminModal()" 
+            class="text-[10px] text-slate-600 hover:text-sky-400 transition flex items-center justify-center gap-1 mx-auto cursor-pointer"
+        >
+            <i class="fa-solid fa-lock text-[9px]"></i> Leadership Portal
+        </button>
+    </footer>
+
+    <!-- Logic Script -->
+    <script>
+        // HARDCODED CONFIG
+        const FIREBASE_PROJECT_ID = "svs-scheduler-a1919";
+        const ADMIN_PASSCODE = "WOS2026"; // Leadership Passcode
+
+        // Full Dataset of Proposals
+        const optionsData = [
+            { 
+                cat: "Villa Reyan's Ideas", 
+                badge: "VILLA",
+                items: [
+                    { tag: "ROM", name: "Realm of Misfits", emoji: "👑" },
+                    { tag: "WWA", name: "White Walkers Anonymous", emoji: "🧟" },
+                    { tag: "BTW", name: "Beyond the Wall", emoji: "🧗" },
+                    { tag: "FFK", name: "Frosted Flakes", emoji: "🥣" },
+                    { tag: "ASS", name: "Arctic Shenanigans Squad", emoji: "🍑" },
+                    { tag: "ICL", name: "Ice Crown Legion", emoji: "👑" },
+                    { tag: "WWP", name: "Winter Wolf Pack", emoji: "🐺" },
+                    { tag: "WWW", name: "Whimsical Winter Warriors", emoji: "🧙" },
+                    { tag: "FEF", name: "Frostbite Elite Force", emoji: "🧊" },
+                    { tag: "CCC", name: "Cozy Chaos Crew", emoji: "☕" }
+                ]
+            },
+            { 
+                cat: "Tech Dad's Ideas", 
+                badge: "TECH DAD",
+                items: [
+                    { tag: "TBA", name: "Tech Backed Alliance", emoji: "💻" },
+                    { tag: "SIN", name: "Survival Instinct Network", emoji: "😈" }
+                ]
+            },
+            { 
+                cat: "Icy's Ideas (Keep GiP Tag)", 
+                badge: "ICY",
+                items: [
+                    { tag: "GiP", name: "Greatness in Progress", emoji: "📈" },
+                    { tag: "GiP", name: "Giants in Power", emoji: "⚡" },
+                    { tag: "GiP", name: "Glory in Playing", emoji: "⚔️" },
+                    { tag: "GiP", name: "Gamers Incorporated", emoji: "🏢" }
+                ]
+            },
+            { 
+                cat: "Rofa's Ideas", 
+                badge: "ROFA",
+                items: [
+                    { tag: "CAT", name: "Chaos and Tacos", emoji: "🌮" },
+                    { tag: "OUT", name: "Outcasts", emoji: "🐺" }
+                ]
+            }
+        ];
+
+        let cachedVotesData = [];
+        let rawFetchedDocs = [];
+
+        // Render Options dynamically
+        function renderOptions() {
+            const container = document.getElementById('optionsList');
+            let html = '';
+
+            optionsData.forEach((group, groupIdx) => {
+                html += `
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-black text-sky-400 uppercase tracking-wider">${group.cat}</span>
+                            <span class="text-[9px] font-mono bg-slate-800/80 text-slate-400 px-2 py-0.5 rounded">${group.badge}</span>
+                        </div>
+                        <div class="grid grid-cols-1 gap-2">
+                `;
+
+                group.items.forEach((opt, itemIdx) => {
+                    const id = `opt_${groupIdx}_${itemIdx}`;
+                    const fullValue = `[${opt.tag}] ${opt.name}`;
+                    
+                    html += `
+                        <label for="${id}" class="option-card flex items-center justify-between p-3 bg-slate-900/80 rounded-xl border border-slate-800 cursor-pointer">
+                            <div class="flex items-center space-x-3">
+                                <input 
+                                    type="radio" 
+                                    id="${id}" 
+                                    name="vote" 
+                                    value="${fullValue}" 
+                                    required 
+                                    class="accent-sky-400 w-4 h-4 cursor-pointer"
+                                >
+                                <span class="text-sm font-medium text-slate-200 flex items-center gap-2">
+                                    <span class="text-base">${opt.emoji}</span>
+                                    <span>${opt.name}</span>
+                                </span>
+                            </div>
+                            <span class="text-xs font-mono font-bold bg-slate-800/90 text-sky-300 border border-sky-500/20 px-2 py-1 rounded-lg">
+                                [${opt.tag}]
+                            </span>
+                        </label>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Handle Firestore POST via REST API
+        async function submitVote(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const rawIgn = document.getElementById('ign').value.trim();
+            const selectedVote = document.querySelector('input[name="vote"]:checked').value;
+
+            // Disable button during network request
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Submitting...`;
+
+            // Document ID encoded to ensure valid URL component
+            const docId = encodeURIComponent(rawIgn); 
+            const endpoint = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/alliance_votes/${docId}`;
+
+            // Firestore REST API payload structure
+            const payload = {
+                fields: {
+                    ign: { stringValue: rawIgn },
+                    vote: { stringValue: selectedVote },
+                    timestamp: { stringValue: new Date().toISOString() }
+                }
+            };
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'PATCH', // PATCH creates or overwrites existing document
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    document.getElementById('pollForm').classList.add('hidden');
+                    document.getElementById('thankYou').classList.remove('hidden');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    const errData = await response.json();
+                    console.error("Firestore Error:", errData);
+                    alert("Submission error: Please make sure you published the new rule in Firebase Console.");
+                }
+            } catch (err) {
+                console.error("Submission error:", err);
+                alert("Network error. Please check your connection and try again.");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                submitBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i><span>Submit Official Vote</span>`;
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('pollForm').classList.remove('hidden');
+            document.getElementById('thankYou').classList.add('hidden');
+        }
+
+        // --- Leadership Admin Dashboard Logic ---
+        function openAdminModal() {
+            document.getElementById('adminModal').classList.remove('hidden');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.add('hidden');
+        }
+
+        function verifyAdminPasscode() {
+            const pass = document.getElementById('adminPasscode').value;
+            if (pass === ADMIN_PASSCODE) {
+                document.getElementById('adminAuthSection').classList.add('hidden');
+                document.getElementById('adminResultsSection').classList.remove('hidden');
+                fetchAdminResults();
+            } else {
+                alert("Incorrect Passcode");
+            }
+        }
+
+        async function fetchAdminResults() {
+            const container = document.getElementById('resultsList');
+            container.innerHTML = `<div class="text-center text-xs text-sky-400 py-6"><i class="fa-solid fa-spinner animate-spin text-xl mb-2"></i><p>Tallying live votes...</p></div>`;
+
+            const endpoint = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/alliance_votes`;
+
+            try {
+                const response = await fetch(endpoint);
+                const data = await response.json();
+
+                if (!data.documents || data.documents.length === 0) {
+                    container.innerHTML = `<p class="text-center text-xs text-slate-500 py-4">No votes recorded yet.</p>`;
+                    document.getElementById('totalVotesCount').innerText = `Total Votes: 0`;
+                    rawFetchedDocs = [];
+                    cachedVotesData = [];
+                    return;
+                }
+
+                rawFetchedDocs = data.documents;
+
+                // Process Firestore docs
+                const tallyMap = {};
+                const votersMap = {};
+                let totalVotes = 0;
+
+                data.documents.forEach(doc => {
+                    const fields = doc.fields || {};
+                    const vote = fields.vote?.stringValue;
+                    const ign = fields.ign?.stringValue || "Anonymous";
+
+                    if (vote) {
+                        tallyMap[vote] = (tallyMap[vote] || 0) + 1;
+                        if (!votersMap[vote]) votersMap[vote] = [];
+                        votersMap[vote].push(ign);
+                        totalVotes++;
+                    }
+                });
+
+                document.getElementById('totalVotesCount').innerText = `Total Votes: ${totalVotes}`;
+
+                // Sort descending
+                const sorted = Object.entries(tallyMap).sort((a, b) => b[1] - a[1]);
+                cachedVotesData = sorted;
+
+                let html = '';
+                sorted.forEach(([optionName, count], rank) => {
+                    const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
+                    const voters = votersMap[optionName].join(', ');
+
+                    html += `
+                        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3 space-y-2">
+                            <div class="flex items-center justify-between text-xs font-bold">
+                                <span class="text-slate-200 flex items-center gap-1.5">
+                                    <span class="text-sky-400 font-mono">#${rank + 1}</span>
+                                    <span>${optionName}</span>
+                                </span>
+                                <span class="text-sky-300 font-mono">${count} vote${count > 1 ? 's' : ''} (${pct}%)</span>
+                            </div>
+                            <!-- Progress Bar -->
+                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                <div class="bg-sky-400 h-full rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+                            </div>
+                            <!-- Voters list -->
+                            <p class="text-[10px] text-slate-500 truncate">
+                                <i class="fa-solid fa-users text-[9px] text-slate-600"></i> ${voters}
+                            </p>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+
+            } catch (err) {
+                console.error("Error fetching results:", err);
+                container.innerHTML = `<p class="text-center text-xs text-red-400 py-4">Failed to load results. Ensure Firestore read rules are active.</p>`;
+            }
+        }
+
+        // Feature: Clear / Purge All Votes in Database
+        async function clearAllVotes() {
+            if (!rawFetchedDocs.length) {
+                alert("Database is already empty.");
+                return;
+            }
+
+            const confirmation = prompt(`⚠️ WARNING: You are about to permanently delete all ${rawFetchedDocs.length} recorded votes!\n\nTo confirm reset, type "RESET" below:`);
+            if (confirmation !== "RESET") {
+                return;
+            }
+
+            const clearBtn = document.getElementById('clearVotesBtn');
+            clearBtn.disabled = true;
+            clearBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Clearing...`;
+
+            try {
+                // Delete each document asynchronously
+                const deletePromises = rawFetchedDocs.map(doc => {
+                    const docName = doc.name; // Full document path returned by API
+                    const deleteEndpoint = `https://firestore.googleapis.com/v1/${docName}`;
+                    return fetch(deleteEndpoint, { method: 'DELETE' });
+                });
+
+                await Promise.all(deletePromises);
+
+                alert("All test votes have been successfully cleared!");
+                fetchAdminResults(); // Refresh UI
+            } catch (err) {
+                console.error("Error purging database:", err);
+                alert("Failed to clear some votes. Please check network and try again.");
+            } finally {
+                clearBtn.disabled = false;
+                clearBtn.innerHTML = `<i class="fa-solid fa-trash-can"></i> Clear All Votes`;
+            }
+        }
+
+        function copyResultsToClipboard() {
+            if (!cachedVotesData.length) {
+                alert("No results to copy yet.");
+                return;
+            }
+
+            let summary = "📊 **ALLIANCE REBRAND POLL RESULTS**\n\n";
+            cachedVotesData.slice(0, 5).forEach(([opt, count], i) => {
+                summary += `${i + 1}. **${opt}** — ${count} vote${count > 1 ? 's' : ''}\n`;
+            });
+            summary += "\nThank you to everyone who voted!";
+
+            // Copy utilizing fallback execution command for iframe safety
+            const tempInput = document.createElement("textarea");
+            tempInput.value = summary;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+
+            alert("Top 5 Results copied to clipboard! Ready to paste into Discord or Alliance Mail.");
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            renderOptions();
+        };
+    </script>
+</body>
+</html>
+
